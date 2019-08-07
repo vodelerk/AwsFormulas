@@ -1,0 +1,48 @@
+-Command used in Live Activity-
+
+// List all functions in the region.
+aws lambda list-functions --region us-east-1
+
+// Creating our function.
+aws lambda create-function --region us-east-1 --function-name "ListS3Buckets" --runtime "nodejs8.10" --role "arn:aws:iam::085956924925:role/lambda_exec_role_LA" --handler "lambda_function.handler" --zip-file fileb:///home/cloud_user/lambda_function.zip
+
+// Updating our use case function.
+aws lambda update-function-configuration --region us-east-1 --function-name "ListS3Buckets" --description "Creating our S3 function via CLI." --timeout 5 --memory-size 256
+
+// Invoking our function
+aws lambda invoke --region us-east-1 --function-name "ListS3Buckets" OUTFILE.log
+
+
+aws lambda create-function \
+--region us-east-1 \
+--function-name "EbsSnapshot" \
+--description "Creates a snapshot when instances are going to stop or terminate." \
+--zip-file fileb:///home/cloud_user/lambda_function.zip \
+--role arn:aws:iam::046499109889:role/lambda_exec_role_LA \
+--handler lambda_function.lambda_handler \
+--runtime "python3.6" \
+--timeout 10 \
+--memory-size 1024
+
+
+
+aws events put-rule \
+--name "EC2-Stopping" \
+--event-pattern "{\"source\":[\"aws.ec2\"],\"detail-type\":[\"EC2 Instance State-change Notification\"],\"detail\":{\"state\":[\"shutting-down\",\"stopping\"]}}" \
+--state "ENABLED" \
+--description "Takes EBS Snapshot of volume of instance shutting down." \
+--region us-east-1
+
+aws events put-targets \
+--rule "EC2-Stopping" \
+--targets "Id"="1","Arn"="arn:aws:lambda:us-east-1:046499109889:function:EbsSnapshot" \
+--region us-east-1
+
+// Permissions for invoking Lambda.
+aws lambda add-permission \
+--statement-id 'abcd-1234-5678' \
+--action 'lambda:InvokeFunction' \
+--principal events.amazonaws.com \
+--source-arn arn:aws:events:us-east-1:046499109889:rule/EC2-Stopping \
+--function-name EbsSnapshot \
+--region us-east-1
