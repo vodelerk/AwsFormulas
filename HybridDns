@@ -1,0 +1,16 @@
+
+sudo yum update
+nslookup client.awscloud.local
+cat /etc/resolv.conf
+sudo nano /etc/resolv.conf
+Note: Search entry in /etc/resolv.conf should be 'onpremise.local' instead of 'ns1.onpremise.local'
+nslookup ns1.onpremise.local
+ping ns1.onpremise.local
+cat /etc/resolv.conf
+ping ns1
+sudo nano /etc/resolv.conf
+ping ns1.onpremise.local
+ping ns1
+sudo reboot
+cat /etc/resolv.conf
+ping ns1
