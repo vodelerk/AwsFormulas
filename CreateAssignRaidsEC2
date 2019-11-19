@@ -1,0 +1,17 @@
+mdadm --create --verbose /dev/md0 --level=0 --name=sata-raid --raid-devices=2 /dev/xvdf /dev/xvdg
+
+//Write a filesystem to the RAID device across all 20 GiB:
+
+mkfs.xfs -L linuxacademy /dev/md0
+
+View the 2 RAID devices called md0:
+
+lsblk
+
+Mount the devices:
+
+mount /dev/md0 /mnt
+
+View the file systems:
+
+df -h
