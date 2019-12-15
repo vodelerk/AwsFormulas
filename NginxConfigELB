@@ -1,0 +1,40 @@
+
+Create a Proxy Protocol Policy for an ELB
+
+From the AWS CLI, enter:
+
+aws elb create-load-balancer-policy --load-balancer-name "the name of the load balancer" --policy- name sata-policy --policy-type-name ProxyProtocolPolicyType --policy-attributes AttributeName=ProxyProtocol,AttributeValue=true
+
+Configure Nginx for Proxy Protocol
+
+From the AWS CLI:
+
+cd /etc/nginx
+vim nginx.conf
+
+Locate the section that denotes where the server is listening. It should look like:
+
+server {
+listen 80 default_server; listen [::]:80 default_server; server_name _;
+root /usr/share/nginx/html;
+
+Change the listen value from default_server to proxy_protocol:
+
+server {
+listen 80 proxy_protocol; listen [::]:80 proxy-protocol; server_name _;
+root /usr/share/nginx/html;
+
+Additionally, we need to set the read_ip_header to proxy_protocol:
+
+server {
+listen 80 proxy_protocol; listen [::]:80 proxy_protocol; set_real_ip_from 10.0.0.0/16; real_ip_header proxy_protocol; server_name _;
+root /usr/share/nginx/html;
+
+We want to replace the $remote_addr variable with the $proxy_protocol_ addr variable:
+
+http {
+log_format main ‘$proxy_protocol_addr - $remote_user [$time_local] “$request” ‘
+‘$status $body_bytes_sent “$http_referer” ‘ ‘”$http_user_agent” “$http_x_forwarded_for”’;
+Save and exit, then restart Nginx:
+
+systemctl restart nginx
