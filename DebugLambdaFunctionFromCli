@@ -1,0 +1,9 @@
+
+
+aws lambda invoke --function-name DebuggingTestFunction --payload '{"String":"racecar" }' log.txt
+
+aws logs describe-log-groups
+
+aws logs describe-log-streams --log-group-name "/aws/lambda/DebuggingTestFunction" --order-by LastEventTime
+
+aws logs get-log-events --log-group-name "/aws/lambda/DebuggingTestFunction" --log-stream-name "<LOG_STREAM_NAME>" | jq '.events[].timestamp |= ( ./ 1000 | strftime("%Y-%m-%d %T%p"))'
